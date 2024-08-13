@@ -138,3 +138,99 @@ SELECT * FROM Subjects;
 SELECT * FROM Teachers;
 SELECT * FROM Lectures;
 SELECT * FROM GroupsLectures;
+
+--==================================================================================
+
+--1. ¬ивести вс≥ можлив≥ пари р€дк≥в викладач≥в та груп.
+--SELECT Teachers.Name,Teachers.Surname, Groups.Name as GroupName, Groups.Year, Groups.DepartmentId
+--FROM Teachers, Lectures, GroupsLectures, Groups
+--WHERE Lectures.TeacherId = Teachers.Id AND GroupsLectures.LectureId = Lectures.Id AND GroupsLectures.GroupId = Groups.Id;
+--GO
+
+SELECT Teachers.*, Groups.*
+FROM Teachers,Groups;
+
+--2. ¬ивести назви факультет≥в, фонд ф≥нансуванн€ кафедр €ких перевищуЇ фонд ф≥нансуванн€ факультету.
+SELECT Faculties.Name
+FROM Departments
+JOIN Faculties ON Departments.FacultyId = Faculties.Id
+WHERE Departments.Financing >= Faculties.Financing;
+GO
+
+--3. ¬ивести пр≥звища куратор≥в груп та назви груп, €к≥ вони курирують.
+SELECt Curators.Surname, Groups.Name
+FROM Curators,Groups,GroupsCurators
+WHERE GroupsCurators.GroupId = Groups.Id AND GroupsCurators.CuratorId=Curators.Id;
+GO
+
+--4. ¬ивести ≥мена та пр≥звища викладач≥в, €к≥ читають лекц≥њ у груп≥ УME-1Ф
+SELECT Teachers.Name,Teachers.Surname
+FROM Teachers
+JOIN Lectures ON Teachers.Id = Lectures.TeacherId
+JOIN GroupsLectures ON Lectures.Id = GroupsLectures.LectureId
+JOIN Groups ON GroupsLectures.GroupId = Groups.Id
+WHERE Groups.Name = 'ME-1';
+GO
+
+-- 5. ¬ивести пр≥звища викладач≥в та назви факультет≥в, на €ких вони читають лекц≥њ.
+SELECT Teachers.Name,Teachers.Surname, Faculties.Name
+FROM Teachers
+JOIN Lectures ON Teachers.Id = Lectures.TeacherId
+JOIN GroupsLectures ON Lectures.Id = GroupsLectures.LectureId
+JOIN Groups ON GroupsLectures.GroupId = Groups.Id
+JOIN Departments ON Departments.Id = Groups.DepartmentId
+JOIN Faculties ON Departments.FacultyId = Faculties.Id;
+GO
+
+--6. ¬ивести назви кафедр та назви груп, €к≥ до них належать.
+SELECT Departments.Name, Groups.Name
+FROM Groups
+JOIN Departments ON Groups.DepartmentId = Departments.Id;
+GO
+
+
+
+--7. ¬ивести назви дисципл≥н, €к≥ читаЇ викладач УSamantha AdamsФ.
+SELECT Subjects.Name
+FROM Subjects
+JOIN Lectures ON Subjects.Id = Lectures.SubjectId
+JOIN Teachers ON Teachers.Id = Lectures.TeacherId
+WHERE Teachers.Name = 'Emily' AND Teachers.Surname = 'Davis';
+GO
+
+--8. ¬ивести назви кафедр, де читаЇтьс€ дисципл≥на УDatabase TheoryФ.
+SELECT Departments.Name
+FROM Departments
+JOIN Groups ON Groups.DepartmentId = Departments.Id
+JOIN GroupsLectures ON GroupsLectures.GroupId = Groups.Id
+JOIN Lectures ON Lectures.Id = GroupsLectures.LectureId
+JOIN Subjects ON Subjects.Id = Lectures.SubjectId
+WHERE Subjects.Name = 'Programming';
+GO
+
+-- 9. ¬ивести назви груп, що належать до факультету Computer Science.
+SELECT Groups.Name
+FROM Groups
+JOIN Departments ON Departments.Id = Groups.DepartmentId
+JOIN Faculties ON Faculties.Id = Departments.FacultyId
+WHERE Faculties.Name = 'Computer Science';
+GO
+
+-- 10. ¬ивести назви груп 5-го курсу, а також назву факультет≥в, до €ких вони належать.
+SELECT Groups.Name, Groups.Year, Faculties.Name
+FROM Groups
+JOIN Departments ON Departments.Id = Groups.DepartmentId
+JOIN Faculties ON Departments.FacultyId = Faculties.Id
+WHERE Groups.Year = 5;
+
+--11. ¬ивести повн≥ ≥мена викладач≥в та лекц≥њ, €к≥ вони читають (назви дисципл≥н та груп), причому в≥д≥брати лише т≥
+--лекц≥њ, що читаютьс€ в аудитор≥њ УB103Ф. 
+
+SELECT Teachers.Name,Teachers.Surname, Subjects.Name as SubjectName, Groups.Name as GroupName, Lectures.LectureRoom
+FROM Teachers
+JOIN Lectures ON Lectures.TeacherId = Teachers.Id
+JOIN Subjects ON Subjects.Id = Lectures.SubjectId
+JOIN GroupsLectures ON GroupsLectures.LectureId = Lectures.Id
+JOIN Groups ON Groups.Id = GroupsLectures.GroupId
+WHERE Lectures.LectureRoom = 'Room C303';
+GO
