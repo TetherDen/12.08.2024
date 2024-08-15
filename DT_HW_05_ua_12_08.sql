@@ -1,8 +1,16 @@
 use Academy;
 GO
 
+-- Р”РѕР±Р°РІР»РµРЅРёРµ DayOfWeek РІ С‚Р°Р±Р»РёС†Сѓ GroupsLectures 
+ALTER TABLE GroupsLectures 
+ADD DayOfWeek int CHECK(DayOfWeek BETWEEN 1 AND 7 )
+GO
 
--- 1. Вивести кількість викладачів кафедри «Software Development».
+UPDATE GroupsLectures SET DayOfWeek = 5 WHERE Id = 2;
+GO
+
+
+-- 1. Р’РёРІРµСЃС‚Рё РєС–Р»СЊРєС–СЃС‚СЊ РІРёРєР»Р°РґР°С‡С–РІ РєР°С„РµРґСЂРё В«Software DevelopmentВ».
 SELECT COUNT (DISTINCT Teachers.Id) as 'Software Teachers'
 FROM Teachers
 JOIN  Lectures ON Lectures.TeacherId = Teachers.Id
@@ -12,30 +20,37 @@ JOIN Departments ON Departments.Id = Groups.DepartmentId
 WHERE Departments.Name = 'Software Development';
 GO
 
---2. Вивести кількість лекцій, які читає викладач “Dave McQueen”.
+--2. Р’РёРІРµСЃС‚Рё РєС–Р»СЊРєС–СЃС‚СЊ Р»РµРєС†С–Р№, СЏРєС– С‡РёС‚Р°С” РІРёРєР»Р°РґР°С‡ вЂњDave McQueenвЂќ.
 SELECT COUNT (*)
 FROM Lectures
 JOIN Teachers ON Teachers.Id = Lectures.TeacherId
 WHERE Teachers.Name = 'Robert' AND Teachers.Surname = 'Taylor';
 GO
 
---3. Вивести кількість занять, які проводяться в аудиторії “D201”
+--3. Р’РёРІРµСЃС‚Рё РєС–Р»СЊРєС–СЃС‚СЊ Р·Р°РЅСЏС‚СЊ, СЏРєС– РїСЂРѕРІРѕРґСЏС‚СЊСЃСЏ РІ Р°СѓРґРёС‚РѕСЂС–С— вЂњD201вЂќ
 SELECT COUNT (*)
 FROM Lectures
 WHERE Lectures.LectureRoom = 'Room A101';
 GO
 
--- 4. Вивести назви аудиторій та кількість лекцій, що проводяться в них.
+-- 4. Р’РёРІРµСЃС‚Рё РЅР°Р·РІРё Р°СѓРґРёС‚РѕСЂС–Р№ С‚Р° РєС–Р»СЊРєС–СЃС‚СЊ Р»РµРєС†С–Р№, С‰Рѕ РїСЂРѕРІРѕРґСЏС‚СЊСЃСЏ РІ РЅРёС….
 SELECT Lectures.LectureRoom, COUNT (*) as LecturesCount
 FROM Lectures
 GROUP BY Lectures.LectureRoom;
 GO
 
---5. Вивести кількість студентів, які відвідують лекції викладача “Jack Underhill”.
---  TODO: THere is no Student count in DB
---  TODO: Добавить таблицу студентов
+--5. Р’РёРІРµСЃС‚Рё РєС–Р»СЊРєС–СЃС‚СЊ СЃС‚СѓРґРµРЅС‚С–РІ, СЏРєС– РІС–РґРІС–РґСѓСЋС‚СЊ Р»РµРєС†С–С— РІРёРєР»Р°РґР°С‡Р° вЂњJack UnderhillвЂќ.
+SELECT COUNT (DISTINCT Students.Id) as PeterBrownStudentsCount
+FROM Students
+JOIN Groups ON Groups.Id = Students.GroupId
+JOIN GroupsLectures ON GroupsLectures.GroupId = Groups.Id
+JOIN Lectures ON Lectures.Id = GroupsLectures.LectureId
+JOIN Teachers ON Teachers.Id = Lectures.TeacherId
+WHERE Teachers.Name = 'Peter' AND Teachers.Surname = 'Brown'
+GO
 
--- 6. Вивести середню ставку викладачів факультету Computer Science.
+
+-- 6. Р’РёРІРµСЃС‚Рё СЃРµСЂРµРґРЅСЋ СЃС‚Р°РІРєСѓ РІРёРєР»Р°РґР°С‡С–РІ С„Р°РєСѓР»СЊС‚РµС‚Сѓ Computer Science.
 SELECT AVG(Salary)
 FROM Teachers
 JOIN Lectures ON Lectures.TeacherId = Teachers.Id
@@ -46,19 +61,23 @@ JOIN Faculties ON Departments.FacultyId = Faculties.Id
 WHERE Faculties.Name = 'Computer Science';
 GO
 
--- 7. Вивести мінімальну та максимальну кількість студентів серед усіх груп.
--- TODO: STUDENTS
---SELECT MAX(StudentsInGroup)
---FROM Groups
+-- 7. Р’РёРІРµСЃС‚Рё РјС–РЅС–РјР°Р»СЊРЅСѓ С‚Р° РјР°РєСЃРёРјР°Р»СЊРЅСѓ РєС–Р»СЊРєС–СЃС‚СЊ СЃС‚СѓРґРµРЅС‚С–РІ СЃРµСЂРµРґ СѓСЃС–С… РіСЂСѓРї.
+
+
+SELECT Students.GroupId, Groups.Name, COUNT(*) as GroupStudentCOunt FROM Students
+JOIN Groups ON Groups.Id = Students.GroupId
+GROUP BY Students.GroupId,Groups.Name
+HAVING MAX(Students.Id)    -- Tyt nado kak-to  HAVING MAX sdelat !?
 
 
 
---8. Вивести середній фонд фінансування кафедр.
+
+--8. Р’РёРІРµСЃС‚Рё СЃРµСЂРµРґРЅС–Р№ С„РѕРЅРґ С„С–РЅР°РЅСЃСѓРІР°РЅРЅСЏ РєР°С„РµРґСЂ.
 SELECT AVG(Financing) as AverageFinancing
 FROM Departments;
 GO
 
---9. Вивести повні імена викладачів та кількість читаних ними дисциплін.
+--9. Р’РёРІРµСЃС‚Рё РїРѕРІРЅС– С–РјРµРЅР° РІРёРєР»Р°РґР°С‡С–РІ С‚Р° РєС–Р»СЊРєС–СЃС‚СЊ С‡РёС‚Р°РЅРёС… РЅРёРјРё РґРёСЃС†РёРїР»С–РЅ.
 SELECT Teachers.Name,Teachers.Surname, COUNT(DISTINCT Subjects.Name) as CountSubjects
 FROM Teachers
 JOIN Lectures ON Lectures.TeacherId = Teachers.Id
@@ -66,10 +85,13 @@ JOIN Subjects ON Lectures.SubjectId = Subjects.Id
 GROUP BY Teachers.Name, Teachers.Surname;
 GO
 
---10. Вивести кількість лекцій щодня протягом тижня
--- TODO:   кількість лекцій щодня протягом тижня ?
+-- 10. Р’РёРІРµСЃС‚Рё РєС–Р»СЊРєС–СЃС‚СЊ Р»РµРєС†С–Р№ С‰РѕРґРЅСЏ РїСЂРѕС‚СЏРіРѕРј С‚РёР¶РЅСЏ.
+SELECT COUNT(GroupsLectures.DayOfWeek), GroupsLectures.DayOfWeek FROM GroupsLectures
+JOIN Lectures ON GroupsLectures.LectureId = Lectures.Id
+GROUP BY GroupsLectures.DayOfWeek 
+GO
 
---11. Вивести номери аудиторій та кількість кафедр, чиї лекції в них читаються.
+--11. Р’РёРІРµСЃС‚Рё РЅРѕРјРµСЂРё Р°СѓРґРёС‚РѕСЂС–Р№ С‚Р° РєС–Р»СЊРєС–СЃС‚СЊ РєР°С„РµРґСЂ, С‡РёС— Р»РµРєС†С–С— РІ РЅРёС… С‡РёС‚Р°СЋС‚СЊСЃСЏ.
 SELECT Lectures.LectureRoom, COUNT(DISTINCT Departments.Id)
 FROM Lectures
 JOIN GroupsLectures ON GroupsLectures.LectureId = Lectures.Id
@@ -78,7 +100,7 @@ JOIN Departments ON Departments.Id = Groups.DepartmentId
 GROUP BY Lectures.LectureRoom;
 GO
 
--- 12.Вивести назви факультетів та кількість дисциплін, які на них читаються.
+-- 12.Р’РёРІРµСЃС‚Рё РЅР°Р·РІРё С„Р°РєСѓР»СЊС‚РµС‚С–РІ С‚Р° РєС–Р»СЊРєС–СЃС‚СЊ РґРёСЃС†РёРїР»С–РЅ, СЏРєС– РЅР° РЅРёС… С‡РёС‚Р°СЋС‚СЊСЃСЏ.
 SELECT Faculties.Name, COUNT(DISTINCT Subjects.Id) as CountSubjects
 FROM Faculties
 JOIN Departments ON Departments.FacultyId = Faculties.Id
@@ -89,9 +111,45 @@ JOIN Subjects ON Subjects.Id = Lectures.SubjectId
 GROUP BY Faculties.Name;
 GO
 
---13. Вивести кількість лекцій для кожної пари викладач-аудиторія. 
+--13. Р’РёРІРµСЃС‚Рё РєС–Р»СЊРєС–СЃС‚СЊ Р»РµРєС†С–Р№ РґР»СЏ РєРѕР¶РЅРѕС— РїР°СЂРё РІРёРєР»Р°РґР°С‡-Р°СѓРґРёС‚РѕСЂС–СЏ. 
 SELECT Teachers.Name,Teachers.Surname,Lectures.LectureRoom,COUNT(*)
 FROM Lectures
 JOIN Teachers ON Teachers.Id = Lectures.TeacherId
 GROUP BY Teachers.Name,Teachers.Surname,Lectures.LectureRoom;
 GO
+
+--===================================================================
+
+CREATE TABLE Students(
+	Id int primary key identity(1,1),
+	Name nvarchar(max) NOT NULL CHECK(Name<>N''),
+	Surname nvarchar(max) NOT NULL CHECK(Surname<>N''),
+	GroupId int NOT NULL FOREIGN KEY REFERENCES Groups(Id)
+)
+GO
+
+INSERT INTO Students (Name, Surname, GroupId)
+VALUES 
+    ('Alice', 'Johnson', 1),
+    ('Bob', 'Smith', 2),
+    ('Charlie', 'Brown', 3),
+    ('Diana', 'White', 4),
+    ('Eve', 'Black', 1),
+    ('Frank', 'Green', 2),
+    ('Grace', 'Blue', 3),
+    ('Hank', 'Yellow', 4),
+    ('Ivy', 'Red', 1),
+    ('Jack', 'Orange', 2),
+    ('Kara', 'Purple', 3),
+    ('Leo', 'Pink', 4),
+    ('Mia', 'Gray', 1),
+    ('Nina', 'Silver', 2),
+    ('Oscar', 'Gold', 3),
+    ('Paul', 'Bronze', 4),
+    ('Quinn', 'Copper', 4),
+    ('Rita', 'Platinum', 2),
+    ('Sam', 'Diamond', 3),
+    ('Tina', 'Emerald', 4);
+GO
+
+--===================================================================
