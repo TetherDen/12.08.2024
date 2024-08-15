@@ -63,12 +63,15 @@ GO
 
 -- 7. Вивести мінімальну та максимальну кількість студентів серед усіх груп.
 
-
 SELECT Students.GroupId, Groups.Name, COUNT(*) as GroupStudentCOunt FROM Students
 JOIN Groups ON Groups.Id = Students.GroupId
 GROUP BY Students.GroupId,Groups.Name
-HAVING MAX(Students.Id)    -- Tyt nado kak-to  HAVING MAX sdelat !?
+HAVING MAX()    -- Tyt nado kak-to  HAVING MAX sdelat !?
+GO
 
+SELECT COUNT(*) as MaxGroup FROM Students, Groups
+WHERE Students.GroupId = Groups.Id  AND Students.GroupId = (SELECT MAX (Students.GroupId) FROM Students)  ;
+GO
 
 
 
